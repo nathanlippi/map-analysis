@@ -1,0 +1,27 @@
+I have heard of software that does something similar to this.  
+
+I made this code to get a bit more experience with Lisp, and also to see if I can make the processing go an order of magnitude more quickly than the original program.
+
+This has a basic Common Lisp back end for generating and taking a grid of data that represents different map elevations.
+
+The backend is then capable of calculating the relation of each point to the average of the other points within a certain distance.
+
+See the below grid for an example.  Each number represents an elevation:
+
++-+-+-+
+|3|2|1|
++-+-+-+
+|2|5|2|
++-+-+-+
+|2|3|1|
++-+-+-+
+
+The average of all the cells surrounding the middle cell is 2.  The value of the middle cell is 5.
+
+5/2 gives us a computed value of 2.5 for the middle cell.
+
+---
+
+The javascript front end shows us some basic functionality.  
+
+You can retrieve randomly-generated maps from the backend and display them.  You cannot currently display the processed map, however, though it probably would take less than an hour of hacking.

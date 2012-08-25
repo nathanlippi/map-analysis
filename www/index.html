@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" charset="utf8" lang="en">
+</html>
+    <head>
+        <title>
+        </title>
+        <link href="main.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="main.js"></script>
+        <script type="text/javascript" src="jquery.js"></script>
+        <script type="text/javascript" 
+                src="http://github.com/downloads/rsandor/gury/gury.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                get_map_data(2, display_map_canvas);
+            });
+        </script>
+    </head>
+    <body>
+        <div id="map_container">
+            <div id="map_display">
+
+            </div>
+            <div id="map_controls">
+                <input type="button" onclick="get_map_data($('#map_size').val(), display_map_canvas)" value="Generate">
+                <input type="text" value="2" id="map_size"> 
+            </div>
+        </div>
+    </body>
+</html>

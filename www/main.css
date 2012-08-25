@@ -1,0 +1,25 @@
+#map_container {
+    width: 90%;
+    height: 100%;
+    margin: 0px auto;
+}
+
+#map_display {
+    height: 90%;
+    width: 100%;
+    margin: 0px auto;
+    border: 1px solid gray;
+}
+
+#map_controls {
+    /* border: 1px solid black; */
+}
+
+.map_cell {
+    float: left;
+}
+
+.clear {
+    clear: both;
+}
+
