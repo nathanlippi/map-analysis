@@ -20,8 +20,12 @@ The average of all the cells surrounding the middle cell is 2.  The value of the
 
 5/2 gives us a computed value of 2.5 for the middle cell.
 
+When you analyze an entire map, this calculation is done for each cell that has enough points around it within the given "radius" (right now our "radius" is just a square).
+
 ---
 
 The javascript front end shows us some basic functionality.  
 
-You can retrieve randomly-generated maps from the backend and display them.  You cannot currently display the processed map, however, though it probably would take less than an hour of hacking.
+You can retrieve randomly-generated maps from the backend and display them; elevations have color codes ranging between green and red.  
+
+You cannot currently display the processed map, however, though it probably would take less than an hour of hacking.
