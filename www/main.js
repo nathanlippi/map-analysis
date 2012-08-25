@@ -45,9 +45,9 @@ function display_map_canvas(map_data) {
 // Should convert number from 1-100 to color... from green to red for now
 // Give it a value from 1-100, will return a value ranging from red to green
 function get_hex_color(val) {
-    var red_val = Math.round(val*2.55);
+    var red_val   = Math.round(val*2.55);
     var green_val = 255 - red_val;
-    var blue_val = 0;
+    var blue_val  = 0;
 
     // Convert to hex
     red_val =   convert_2_hex_string(red_val);

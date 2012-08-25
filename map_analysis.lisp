@@ -1,20 +1,17 @@
+;; Exploring a faster way to do analysis of maps 
+;; Want to make a simple implementation first, then test out different
+;; algorithms
+;;
+
 ;; (load "/home/nathan/Dropbox/projects/map_analysis/map_analysis.lisp")
 ;; (analyze-map-brute (generate-map-random 10 10) 3)
 ;;
 ;; The below takes below .14x seconds on my machine
 ;; (benchmark-analyze-map 'analyze-map-brute :map-size 200 :radius 2)
-;; Macro:
+;;
+;; Using a macro to slightly simplify syntax:
 ;; (benchmark-map analyze-map-brute :map-size 10 :radius 2)
 ;;
-;; Exploring a faster way to do analysis of maps 
-;; Want to make a simple implementation first, then test out different
-;; algorithms
-;;
-;; Want to display the results via js? (using parenscript?)
-;; 
-;; Needs a JS front-end, that will display a randomly-generated map, and changes that
-;; it gets from API calls.
-;; Also needs an API to make calls to
 
 (dolist (x '(:hunchentoot :parenscript))
   (asdf:oos 'asdf:load-op x))

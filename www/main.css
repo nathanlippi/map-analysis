@@ -11,15 +11,6 @@
     border: 1px solid gray;
 }
 
-#map_controls {
-    /* border: 1px solid black; */
-}
+#map_controls { 
 
-.map_cell {
-    float: left;
 }
-
-.clear {
-    clear: both;
-}
-
