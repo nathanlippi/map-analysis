@@ -20,7 +20,7 @@ The average of all the cells surrounding the middle cell is 2.  The value of the
 
 5/2 gives us a computed value of 2.5 for the middle cell.
 
-When you analyze an entire map, this calculation is done for each cell that has enough points around it within the given "radius" (right now our "radius" is just a square).
+When you analyze an entire map, this calculation is done for each cell that has enough points around it within the given radius (right now, for convenience's sake, we compute a square using the radius, not a circle).
 
 ---
 
