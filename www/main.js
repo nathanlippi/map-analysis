@@ -1,4 +1,5 @@
 var map_id = 'map_display';
+var pxl_ct = 0;
 
 function get_map_data(map_size, callback) {
     var url = "http://127.0.0.1:8082/mapanimate?size="+map_size;
@@ -54,16 +55,30 @@ function display_map_canvas(map_data_array) {
         var cell_width  = Math.floor(map_width/y_len);
 
         $.each(map_data, function(i, row) {
+            var y_stretch = stretch(map_height, cell_height, y_len, i);
             $.each(row, function(j, cell) {
                 ctx.fillStyle = '#'+get_hex_color(cell);
-                ctx.fillRect(x0, y0, cell_width, cell_height);
+                ctx.fillRect(x0, y0, cell_width, cell_height + y_stretch);
                 x0 += cell_width;
             });
             x0 = 0;
-            y0 += cell_height;
+            y0 += (cell_height + y_stretch);
         });
+        // Clear global var used in stretch fn
+        pxl_ct = 0;
       }
     }).place("#map_display").play(1000);
+}
+
+function stretch(parent_len, child_len, child_count, n) {
+   var leftover = parent_len - child_len*child_count;
+   pxl_ct += (leftover / parent_len)*(parent_len / child_count);
+   var val = 0;
+   if(pxl_ct > 1) {
+       val = 1;
+       pxl_ct--;
+   }
+   return val;
 }
 
 // Should convert number from 1-100 to color... from green to red for now
