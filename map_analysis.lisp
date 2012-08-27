@@ -14,6 +14,9 @@
 ;;
 ;; This needs to be switched over to doing ARRAYS not
 ;; lists... probably much more efficient...
+;;
+;; Next up:
+;; Stretch the map every x/y pixels when displaying
 
 (dolist (x '(:hunchentoot :parenscript))
   (asdf:oos 'asdf:load-op x))
@@ -49,6 +52,9 @@
 (defun get-point (map x y) (nth x (nth y map)))
 (defun set-point (map x y val) (setf (nth x (nth y map)) val) map)
 
+(defun rotate (list-of-lists)
+  (apply #'mapcar #'list list-of-lists))
+
 (defun generate-map-random (map-x map-y)
   (loop for i from 1 to map-y collect
     (loop for j from 1 to map-x collect (random 100))))
@@ -60,9 +66,29 @@
 (defun transform-map-roughen (map &key (max-variation 2))
   (mapcar #'(lambda(map-row) (mapcar 
       #'(lambda(x) (let 
-          ((val (+ (random-elt (range (* max-variation -1) max-variation)) x)))
-            (if (> val 0) (if (<= val 100) val 100) 0)))
+          ((val (+ (random-in-range max-variation) x))) (point-in-range val)))
     map-row)) map))
+
+(defun transform-map-wave (map &key (max-slope 10) (max-variation 2))
+  (let ((slope (random-in-range max-slope)) (variation 0))
+    (mapcar #'(lambda(map-row) 
+      (setf variation (random-in-range max-variation))
+      (setf slope (point-in-range (+ slope variation) :max max-slope :min (*- max-slope)))
+      (transform-row-shift map-row slope)) map)))
+
+(defun transform-map-wave-vertical (map &key (max-slope 10) (max-variation 2))
+  (rotate 
+    (transform-map-wave (rotate map) :max-slope max-slope :max-variation max-variation)))
+
+(defun transform-row-shift (row vector)
+  (mapcar #'(lambda(cell) (point-in-range (+ cell vector))) row))
+
+(defun point-in-range (pt &key (min 0) (max 100))
+  (if (> pt min) (if (<= pt max) pt max) min))
+
+(defun *- (num) (* -1 num))
+;; Pass it one num ... 10 would imply a range from -10 to 10
+(defun random-in-range (num) (random-elt (range (*- num) num)))
 
 ;; Will currently get surrounding square, not circle
 (defun get-surrounding-points (map x y radius)
@@ -107,11 +133,12 @@
   (setf (hunchentoot:content-type*) "application/json")
   (let ((sz (parse-integer size)))
     (json:encode-json-to-string
-      (transform-animate (generate-map-random sz sz) 
+      (transform-animate (generate-map-flat sz sz) 
+                         (transform-map-wave :max-variation 5 :max-slope 20)
+                         (transform-map-wave-vertical :max-variation 5 :max-slope 10)
                          (transform-map-roughen :max-variation 5)
-                         (transform-map-roughen :max-variation 5)
-                         (transform-map-roughen :max-variation 5)
-                         (transform-map-roughen :max-variation 5)))))
+                         (transform-map-roughen :max-variation 10)
+                         (transform-map-roughen :max-variation 10)))))
 
 ;; What I want for the macro:
 ;; (transform-animate (generate-map-random 5 5) 
@@ -123,7 +150,8 @@
   `(let ((map-list (list ,map-generate-fn)))
     ,@(loop for map-transform-fn in map-transform-fns collect
        `(setf map-list (cons 
-          ,(insert-after map-transform-fn 0 '(car map-list)) map-list)))))
+          ,(insert-after map-transform-fn 0 '(car map-list)) map-list)))
+    (reverse map-list)))
 
 (defun insert-after (lst index newelt)
   (push newelt (cdr (nthcdr index lst))) lst)
