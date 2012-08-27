@@ -12,6 +12,8 @@
 ;; Using a macro to slightly simplify syntax:
 ;; (benchmark-map analyze-map-brute :map-size 10 :radius 2)
 ;;
+;; This needs to be switched over to doing ARRAYS not
+;; lists... probably much more efficient...
 
 (dolist (x '(:hunchentoot :parenscript))
   (asdf:oos 'asdf:load-op x))
@@ -23,11 +25,44 @@
 (in-package "MAP-ANALYSIS")
 
 (defun slice (list start last) (subseq list start (1+ last)))
+
+;; These two fns are from:
+;; http://stackoverflow.com/questions/9549568/common-lisp-convert-between-lists-and-arrays
+(defun list-to-2d-array (list)
+  (make-array (list (length list)
+                    (length (first list)))
+              :initial-contents list))
+
+(defun 2d-array-to-list (array)
+  (loop for i below (array-dimension array 0)
+        collect (loop for j below (array-dimension array 1)
+                      collect (aref array i j))))
+
+;; http://norvig.com/paip/simple.lisp
+(defun random-elt (choices)
+  (elt choices (random (length choices))))
+
+(defun range (start end) (loop for i from start to end collect i))
+
+;; Can use aref here
+;; Would this be more efficient with big lists?
 (defun get-point (map x y) (nth x (nth y map)))
+(defun set-point (map x y val) (setf (nth x (nth y map)) val) map)
 
 (defun generate-map-random (map-x map-y)
   (loop for i from 1 to map-y collect
     (loop for j from 1 to map-x collect (random 100))))
+
+(defun generate-map-flat (map-x map-y &key (height 50))
+    (2d-array-to-list (make-array (list map-y map-x) :initial-element height)))
+
+;; Make sure that any transformation cannot go outside 0 - 100?
+(defun transform-map-roughen (map &key (max-variation 2))
+  (mapcar #'(lambda(map-row) (mapcar 
+      #'(lambda(x) (let 
+          ((val (+ (random-elt (range (* max-variation -1) max-variation)) x)))
+            (if (> val 0) (if (<= val 100) val 100) 0)))
+    map-row)) map))
 
 ;; Will currently get surrounding square, not circle
 (defun get-surrounding-points (map x y radius)
@@ -68,6 +103,34 @@
   (let* ((sz (parse-integer size)) (map (generate-map-random sz sz)))
     (json:encode-json-to-string map)))
 
+(hunchentoot:define-easy-handler (map-animate :uri "/mapanimate") (size)
+  (setf (hunchentoot:content-type*) "application/json")
+  (let ((sz (parse-integer size)))
+    (json:encode-json-to-string
+      (transform-animate (generate-map-random sz sz) 
+                         (transform-map-roughen :max-variation 5)
+                         (transform-map-roughen :max-variation 5)
+                         (transform-map-roughen :max-variation 5)
+                         (transform-map-roughen :max-variation 5)))))
+
+;; What I want for the macro:
+;; (transform-animate (generate-map-random 5 5) 
+;;                    (transform-map-roughen :max-variation 1)
+;;                    (transform-map-roughen :max-variation 1))
+;;
+
+(defmacro transform-animate (map-generate-fn &rest map-transform-fns)
+  `(let ((map-list (list ,map-generate-fn)))
+    ,@(loop for map-transform-fn in map-transform-fns collect
+       `(setf map-list (cons 
+          ,(insert-after map-transform-fn 0 '(car map-list)) map-list)))))
+
+(defun insert-after (lst index newelt)
+  (push newelt (cdr (nthcdr index lst))) lst)
+
+;; Make a macro where one you pass it a list of fns...  The first fn
+;; generates the map, then the subsequent fns progressively transform it}
 (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor 
                       :port 8082 
                       :document-root #p"/home/nathan/Dropbox/projects/map_analysis/www/"))
+
